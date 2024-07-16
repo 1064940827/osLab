@@ -152,6 +152,20 @@ found:
   return p;
 }
 
+int cUsedProc(void)
+{
+  struct proc *p;
+  int cnt = 0;
+  for (p = proc; p < &proc[NPROC]; p++)
+  {
+    acquire(&p->lock);
+    if (p->state != UNUSED)
+      cnt++;
+    release(&p->lock);
+  }
+  return cnt;
+}
+
 // free a proc structure and the data hanging from it,
 // including user pages.
 // p->lock must be held.
