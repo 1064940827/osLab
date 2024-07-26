@@ -172,7 +172,9 @@ freeproc(struct proc *p)
   p->pagetable = 0;
   if (p->syscallp)
   {
+    kfree((void *)p->syscallp);
   }
+  p->syscallp = 0;
   p->sz = 0;
   p->pid = 0;
   p->parent = 0;

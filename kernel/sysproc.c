@@ -11,10 +11,10 @@ uint64
 sys_exit(void)
 {
   int n;
-  if(argint(0, &n) < 0)
+  if (argint(0, &n) < 0)
     return -1;
   exit(n);
-  return 0;  // not reached
+  return 0; // not reached
 }
 
 uint64
@@ -33,7 +33,7 @@ uint64
 sys_wait(void)
 {
   uint64 p;
-  if(argaddr(0, &p) < 0)
+  if (argaddr(0, &p) < 0)
     return -1;
   return wait(p);
 }
@@ -44,11 +44,11 @@ sys_sbrk(void)
   int addr;
   int n;
 
-  if(argint(0, &n) < 0)
+  if (argint(0, &n) < 0)
     return -1;
-  
+
   addr = myproc()->sz;
-  if(growproc(n) < 0)
+  if (growproc(n) < 0)
     return -1;
   return addr;
 }
@@ -59,13 +59,14 @@ sys_sleep(void)
   int n;
   uint ticks0;
 
-
-  if(argint(0, &n) < 0)
+  if (argint(0, &n) < 0)
     return -1;
   acquire(&tickslock);
   ticks0 = ticks;
-  while(ticks - ticks0 < n){
-    if(myproc()->killed){
+  while (ticks - ticks0 < n)
+  {
+    if (myproc()->killed)
+    {
       release(&tickslock);
       return -1;
     }
@@ -75,12 +76,22 @@ sys_sleep(void)
   return 0;
 }
 
-
 #ifdef LAB_PGTBL
-int
-sys_pgaccess(void)
+int sys_pgaccess(void)
 {
   // lab pgtbl: your code here.
+  uint64 vaOfFirstUserPage, uaOfBuffer;
+  int numberOfPage;
+  uint32 bitmaskTemp = (uint32)0;
+  if (argaddr(0, &vaOfFirstUserPage) < 0 ||
+      argint(1, &numberOfPage) < 0 ||
+      argaddr(2, &uaOfBuffer) < 0)
+    return -1;
+  if (numberOfPage > MAX_CHECK_PG_ACCESS_NUM)
+    return -1;
+  bitmaskTemp = vmpgcheck(myproc()->pagetable, vaOfFirstUserPage, numberOfPage);
+  // printf("%x\n", bitmaskTemp);
+  copyout(myproc()->pagetable, uaOfBuffer, (char *)&bitmaskTemp, sizeof(uint32));
   return 0;
 }
 #endif
@@ -90,7 +101,7 @@ sys_kill(void)
 {
   int pid;
 
-  if(argint(0, &pid) < 0)
+  if (argint(0, &pid) < 0)
     return -1;
   return kill(pid);
 }

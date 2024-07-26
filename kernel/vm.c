@@ -467,3 +467,26 @@ void vmprint(pagetable_t pagetable)
   printf("page table %p\n", pagetable);
   printAllPTEs(pagetable, 1);
 }
+
+uint32 vmpgcheck(pagetable_t pagetable_t, uint64 va, int pgnum)
+{
+  uint32 bitmask = 0;
+  pte_t *p;
+  for (int i = 0; i < pgnum; i++)
+  {
+    if ((p = walk(pagetable_t, va + i * PGSIZE, 0)) != 0)
+    {
+      if ((*p) & PTE_A)
+      {
+        bitmask = (bitmask >> 1) | (1 << (MAX_CHECK_PG_ACCESS_NUM - 1));
+        (*p) = (*p) & (~PTE_A);
+      }
+
+      else
+        bitmask >>= 1;
+    }
+    else
+      panic("vmpgcheck");
+  }
+  return bitmask;
+}
